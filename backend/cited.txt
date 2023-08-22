@@ -1,0 +1,38 @@
+@inproceedings{RekikICIAR14,   
+
+author    = {Ahmed Rekik and Achraf {Ben-Hamadou} and Walid Mahdi},   
+
+title     = {A New Visual Speech Recognition Approach for {RGB-D} Cameras},   
+
+booktitle = {Image Analysis and Recognition - 11th International Conference, {ICIAR}  2014, Vilamoura, Portugal, October 22-24, 2014}
+
+ year      = {2014},   pages     = {21--28} }
+
+
+
+@article{rekik2016adaptive,
+
+title={An adaptive approach for lip-reading using image and depth data},
+
+author={Rekik, Ahmed and Ben-Hamadou, Achraf and Mahdi, Walid},
+
+journal={Multimedia Tools and Applications},
+
+volume={75},
+
+number={14},
+
+pages={8609--8636},
+
+year={2016},
+
+publisher={Springer}
+
+}
+
+
+
+
+Letters = Different Person
+first 00's = Different Phrases/Words
+second 00's = Number of Repeats
