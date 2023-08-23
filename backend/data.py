@@ -4,6 +4,19 @@ import os
 import matplotlib.image as mpimg
 
 
+phrases = ["stop navigation", "excuse me", "i am sorry", "thank you", "good bye", "i love this game", "nice to meet you", "you are welcome", "how are you", "have a good time"]
+words = ["begin", "choose", "connection", "navigation", "next", "previous", "start", "stop", "hello", "wed"]
+
+class Image:
+    def __init__(self, type, id, img):
+        self.type = type
+        self.id = id
+        self.img = img
+    
+    def getImg(self):
+        return self.img
+    
+
 def getAllFolders():
     personNum = 1
 
@@ -47,16 +60,6 @@ def getImgs(imgs, personNum, type, num, repeatNum):
 
     getImgs(imgs, personNum, num, repeatNum)
 
-
-class Image:
-    def __init__(self, type, id, img):
-        self.type = type
-        self.id = id
-        self.img = img
-    
-    def getImg(self):
-        return self.img
-
 def allFolders():
     type = ["phrases", "words"]
     allImages = []
@@ -82,7 +85,7 @@ def allFolders():
                 path = f"C:/Users/travi/OneDrive/Documents/GitHub/lip-reading/MIRACL-VC1_all_in_one/F{realNum}/{type[j]}/{num1}/{num2}"
                 loadedImgs = load_images(path, [])
                 for image in loadedImgs:
-                    test = Image(type[j], num1, image)
+                    test = Image(type[j], i, image)
                     allImages.append(test)
 
 
@@ -106,6 +109,9 @@ def load_images(folder, array):
 testImages = allFolders()
 print(len(testImages))
 
+print(testImages[500].id)
+cv.waitKey(0)
+'''
 test = cv.cvtColor(testImages[0], cv.COLOR_BGR2GRAY)
 
 
@@ -124,4 +130,4 @@ cv.waitKey(0)
 
 #image = load_images(path)
 #cv.imshow("test", image[3])
-#cv.waitKey(0)
+#cv.waitKey(0)'''
