@@ -7,58 +7,15 @@ import matplotlib.image as mpimg
 phrases = ["stop navigation", "excuse me", "i am sorry", "thank you", "good bye", "i love this game", "nice to meet you", "you are welcome", "how are you", "have a good time"]
 words = ["begin", "choose", "connection", "navigation", "next", "previous", "start", "stop", "hello", "wed"]
 
-class Image:
-    def __init__(self, type, id, img):
+class Frame:
+    def __init__(self, type, id, expression, img):
         self.type = type
         self.id = id
+        self.expression = expression
         self.img = img
     
     def getImg(self):
         return self.img
-    
-
-def getAllFolders():
-    personNum = 1
-
-    type = ['phrases', 'words']
-
-    phrasesImgs = manageImgs([], personNum, type[0])
-
-    wordsImgs = manageImgs([], personNum, type[1])
-
-    allImages = phrasesImgs + wordsImgs
-
-def manageImgs(imgs, personNum, type):
-    if (personNum == 12):
-        return imgs
-    
-    if (personNum == 3):
-        personNum += 1
-
-    num = 1
-    repeatNum = 1
-
-    imgs += getImgs(imgs, personNum, type, num, repeatNum)
-
-    personNum += 1
-
-    manageImgs(imgs, personNum)
-
-def getImgs(imgs, personNum, type, num, repeatNum):
-    if (num == 10):
-        return imgs
-    
-    if (repeatNum > 10):
-        num += 1
-        repeatNum = 1
-
-
-    path = f"C:/Users/travi/OneDrive/Documents/GitHub/lip-reading/MIRACL-VC1_all_in_one/F{personNum}/{type}/{num}/{repeatNum}"
-    imgs += load_images(path, imgs)
-
-    repeatNum += 1
-
-    getImgs(imgs, personNum, num, repeatNum)
 
 def allFolders():
     type = ["phrases", "words"]
@@ -69,6 +26,7 @@ def allFolders():
         for i in range(1,12):
             for k in range(1,11):
 
+                phraseIndex = 0
                 num1 = i
                 num2 = k
 
@@ -82,18 +40,18 @@ def allFolders():
                     continue
 
                 realNum = str(i).zfill(2)
-                path = f"C:/Users/travi/OneDrive/Documents/GitHub/lip-reading/MIRACL-VC1_all_in_one/F{realNum}/{type[j]}/{num1}/{num2}"
+                path = f"C:/Users/Crolw/OneDrive/Documents/GitHub/lip-reading/backend/MIRACL-VC1_all_in_one/F{realNum}/{type[j]}/{num1}/{num2}"
                 loadedImgs = load_images(path, [])
                 for image in loadedImgs:
-                    test = Image(type[j], i, image)
+                    test = Frame(type[j], i, phrases[phraseIndex], image)
                     allImages.append(test)
+                phraseIndex += 1
 
 
     return allImages
 
 
 def load_images(folder, array):
-
     for filename in os.listdir(folder):
 
         if ("depth" in filename):
@@ -106,11 +64,14 @@ def load_images(folder, array):
     return array
 
 
-testImages = allFolders()
-print(len(testImages))
+#testImages = getAllFolders()
+#print(len(testImages))
 
-print(testImages[500].id)
-cv.waitKey(0)
+#print(testImages[500].id)
+#cv.imshow("img3", testImages[3])
+#cv.imshow("img20000", testImages[20000])
+#cv.waitKey(0)
+
 '''
 test = cv.cvtColor(testImages[0], cv.COLOR_BGR2GRAY)
 
