@@ -68,10 +68,16 @@ def load_images(folder, array):
 
 
 testImages = np.array(allFolders())
-print(testImages[0].img.shape)
+print(testImages.shape)
 
 croppedArray = crop(testImages)
-cv.imshow("cropTest", croppedArray[0])
+print(len(croppedArray))
+croppedArray = np.array(croppedArray, dtype=object)
+print(f'CroppedArray Length: {len(croppedArray)}')
+print(f'Image 1: {croppedArray[1].shape}')
+
+cv.imshow('Image 1', croppedArray[1])
+cv.imshow('Image 61', croppedArray[61])
 cv.waitKey(0)
 
 #print(len(testImages))
