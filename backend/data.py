@@ -2,6 +2,11 @@ import cv2 as cv
 import glob
 import os
 import matplotlib.image as mpimg
+from dotenv import load_dotenv
+import numpy as np
+from resizing import crop
+
+load_dotenv(".env")
 
 
 phrases = ["stop navigation", "excuse me", "i am sorry", "thank you", "good bye", "i love this game", "nice to meet you", "you are welcome", "how are you", "have a good time"]
@@ -40,7 +45,7 @@ def allFolders():
                     continue
 
                 realNum = str(i).zfill(2)
-                path = f"C:/Users/Crolw/OneDrive/Documents/GitHub/lip-reading/backend/MIRACL-VC1_all_in_one/F{realNum}/{type[j]}/{num1}/{num2}"
+                path = f"C:/Users/travi/OneDrive/Documents/GitHub/lip-reading/MIRACL-VC1_all_in_one/F{realNum}/{type[j]}/{num1}/{num2}"
                 loadedImgs = load_images(path, [])
                 for image in loadedImgs:
                     test = Frame(type[j], i, phrases[phraseIndex], image)
@@ -64,7 +69,14 @@ def load_images(folder, array):
     return array
 
 
-#testImages = getAllFolders()
+
+testImages = np.array(allFolders())
+print(testImages[0].img.shape)
+
+croppedArray = crop(testImages)
+cv.imshow("cropTest", croppedArray[0].img)
+cv.waitKey(0)
+
 #print(len(testImages))
 
 #print(testImages[500].id)
@@ -72,23 +84,3 @@ def load_images(folder, array):
 #cv.imshow("img20000", testImages[20000])
 #cv.waitKey(0)
 
-'''
-test = cv.cvtColor(testImages[0], cv.COLOR_BGR2GRAY)
-
-
-faceCascade = cv.CascadeClassifier('haarcascade_frontalface_alt2.xml')
-face = faceCascade.detectMultiScale(test, 1.1, 4)
-
-for (x, y, w, h) in face:
-    cv.rectangle(testImages[0], (x, y), (x+w, y+h), (0, 0, 255), 2)
-    face = testImages[0][y:y + h, x:x + w]
-    cv.imshow("face",face)
-    #cv.imwrite('face.jpg', face)
-
-cv.imshow("test", testImages[1000])
-cv.waitKey(0)
-
-
-#image = load_images(path)
-#cv.imshow("test", image[3])
-#cv.waitKey(0)'''

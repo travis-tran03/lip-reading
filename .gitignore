@@ -1,2 +1,3 @@
 .venv
 MIRACL-VC1_all_in_one
+backend/.env
