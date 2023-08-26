@@ -2,11 +2,8 @@ import cv2 as cv
 import glob
 import os
 import matplotlib.image as mpimg
-from dotenv import load_dotenv
 import numpy as np
 from resizing import crop
-
-load_dotenv(".env")
 
 
 phrases = ["stop navigation", "excuse me", "i am sorry", "thank you", "good bye", "i love this game", "nice to meet you", "you are welcome", "how are you", "have a good time"]
@@ -45,7 +42,7 @@ def allFolders():
                     continue
 
                 realNum = str(i).zfill(2)
-                path = f"C:/Users/travi/OneDrive/Documents/GitHub/lip-reading/MIRACL-VC1_all_in_one/F{realNum}/{type[j]}/{num1}/{num2}"
+                path = f"C:/Users/Crolw/OneDrive/Documents/GitHub/lip-reading/backend/MIRACL-VC1_all_in_one/F{realNum}/{type[j]}/{num1}/{num2}"
                 loadedImgs = load_images(path, [])
                 for image in loadedImgs:
                     test = Frame(type[j], i, phrases[phraseIndex], image)
@@ -74,7 +71,7 @@ testImages = np.array(allFolders())
 print(testImages[0].img.shape)
 
 croppedArray = crop(testImages)
-cv.imshow("cropTest", croppedArray[0].img)
+cv.imshow("cropTest", croppedArray[0])
 cv.waitKey(0)
 
 #print(len(testImages))
