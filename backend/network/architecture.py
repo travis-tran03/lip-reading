@@ -14,7 +14,7 @@ def neuralNetwork(image):
     # Layers
     # layer1 = (64, 64)
 
-    model = models.Sequential() # Using Convolutional NN Base
+    # model = models.Sequential() # Using Convolutional NN Base
 
     # Sample (WIP Using Keras)
     # layers.Conv2d
