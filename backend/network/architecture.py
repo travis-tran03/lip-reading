@@ -6,6 +6,7 @@ from keras import layers, models
 
 # image = single image
 def neuralNetwork(image):
+    return
     # tempImage = tf.Tensor()
 
     # Convert Imaage into from 3 dimensions into long single dimensional array
@@ -24,7 +25,3 @@ def neuralNetwork(image):
     # layers.flatten => FLATTEN
     # layers.softmax
     # outputs => DENSE
-
-    #
-
-    #

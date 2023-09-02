@@ -3,9 +3,8 @@ import glob
 import os
 import matplotlib.image as mpimg
 import numpy as np
-from resizing import crop
 from dotenv import load_dotenv
-from timeit import timeit
+import cProfile
 
 
 phrases = ["stop navigation", "excuse me", "i am sorry", "thank you", "good bye", "i love this game", "nice to meet you", "you are welcome", "how are you", "have a good time"]
@@ -25,6 +24,18 @@ class Frame:
     def getImg(self):
         return self.img
     
+def test(arr, dir):
+    x = os.scandir(dir)
+
+    for file in x:
+        if file.is_dir():
+            test(arr, file.path)
+        if file.is_file() and '.jpg' in file.name:
+            arr.append(cv.imread(file.path))
+
+    return arr
+
+
 def getAllFolders():
     personNum = 1
 
@@ -119,20 +130,29 @@ def load_images(folder, array):
     return array
 
 
+#testImages = test([], basePath)
 
-testImages = np.array(allFolders())
-testImages2 = np.array(getAllFolders())
+#cv.imshow('TEST', testImages[20000])
+#cv.waitKey(0)
+
+cProfile.run('allFolders()')
+
+
+
+'''
+testImages = np.array(test())
+
 print(testImages.shape)
 print(len(testImages))
-print(testImages2.shape)
-print(len(testImages2))
-
-for_loop_time: float = timeit(stmt='allFolders()', globals=globals(), number=3)
-recursion_time: float = timeit(stmt='getAllFolders()', globals=globals(), number=3)
+print(testImages)
+'''
+'''
+for_loop_time: float = timeit(stmt='allFolders()', globals=globals(), number=1)
+recursion_time: float = timeit(stmt='getAllFolders()', globals=globals(), number=1)
 
 print(f'For-Loop: {for_loop_time}')
 print(f'Recursion: {recursion_time}')
-
+'''
 '''
 croppedArray = crop(testImages)
 print(len(croppedArray))
