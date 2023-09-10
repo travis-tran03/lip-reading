@@ -1,21 +1,16 @@
 import numpy as np
 import tensorflow as tf
 from tensorflow import nn # nn = NeuralNetwork
-from keras import layers, models
+from keras import layers, models, Input
 
 
 # image = single image
 def neuralNetwork(image):
-    return
-    # tempImage = tf.Tensor()
 
-    # Convert Imaage into from 3 dimensions into long single dimensional array
-    # Check using Tensor.shape => (81, 81, 3) => (81**2, 1) = (81*81, 1)
+    model = models.Sequential() # Using Convolutional NN Base
 
-    # Layers
-    # layer1 = (64, 64)
-
-    # model = models.Sequential() # Using Convolutional NN Base
+    model.add(Input(shape= (8, 8, 3)))
+    model.add(layers.Conv2D())
 
     # Sample (WIP Using Keras)
     # layers.Conv2d
@@ -25,3 +20,5 @@ def neuralNetwork(image):
     # layers.flatten => FLATTEN
     # layers.softmax
     # outputs => DENSE
+
+neuralNetwork()

@@ -4,7 +4,8 @@ import os
 import matplotlib.image as mpimg
 import numpy as np
 from dotenv import load_dotenv
-import cProfile
+
+from resizing import crop
 
 
 phrases = ["stop navigation", "excuse me", "i am sorry", "thank you", "good bye", "i love this game", "nice to meet you", "you are welcome", "how are you", "have a good time"]
@@ -123,6 +124,9 @@ def load_images(folder, array):
         if ("depth" in filename):
             break
 
+        if ("calib.txt" in filename):
+            break
+
         img = mpimg.imread(os.path.join(folder, filename))
 
         if img is not None:
@@ -130,47 +134,15 @@ def load_images(folder, array):
     return array
 
 
-#testImages = test([], basePath)
+#testImages = getAllFolders()
 
-#cv.imshow('TEST', testImages[20000])
-#cv.waitKey(0)
+#croppedArr = crop(testImages)
 
-cProfile.run('allFolders()')
-
-
-
-'''
-testImages = np.array(test())
-
-print(testImages.shape)
-print(len(testImages))
-print(testImages)
-'''
-'''
-for_loop_time: float = timeit(stmt='allFolders()', globals=globals(), number=1)
-recursion_time: float = timeit(stmt='getAllFolders()', globals=globals(), number=1)
-
-print(f'For-Loop: {for_loop_time}')
-print(f'Recursion: {recursion_time}')
-'''
-'''
-croppedArray = crop(testImages)
-print(len(croppedArray))
-croppedArray = np.array(croppedArray, dtype=object)
-print(f'CroppedArray Length: {len(croppedArray)}')
-print(f'Image 1: {croppedArray[1].shape}')
-
-# cv.namedWindow("Image 1", cv.WINDOW_NORMAL)
-# cv.resizeWindow("Image 1", 150, 150)
-
-cv.imshow('Image 1', croppedArray[1])
-cv.imshow('Image 61', croppedArray[61])
+singleImage = [mpimg.imread('C:/Users/Crolw/OneDrive/Documents/GitHub/lip-reading/MIRACL-VC1_all_in_one/F01/phrases/01/01/color_011.jpg')]
+croppedImage = crop(singleImage)
+#cv.imshow('TEST', testImages[10000])
+#cv.imshow('cropped', testImages[10000])
+cv.imshow('test', croppedImage[0])
 cv.waitKey(0)
 
-#print(len(testImages))
 
-#print(testImages[500].id)
-#cv.imshow("img3", testImages[3])
-#cv.imshow("img20000", testImages[20000])
-#cv.waitKey(0)
-'''
