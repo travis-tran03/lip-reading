@@ -3,7 +3,7 @@ import numpy as np
 
 def crop(imgArray):
 
-    croppedArray = []
+    croppedArray = np.array([])
 
     for image in imgArray:
         greyImg = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
@@ -14,7 +14,7 @@ def crop(imgArray):
         for (x, y, w, h) in face:
             cv.rectangle(greyImg, (x, y), (x+w, y+h), (0, 0, 255), 2)
             face = greyImg[y:y + h, x:x + w]
-            croppedArray.append(face)
+            croppedArray = np.append(croppedArray, face)
             #cv.imshow("face",face)
             #cv.waitKey(0)
 

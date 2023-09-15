@@ -124,9 +124,6 @@ def load_images(folder, array):
         if ("depth" in filename):
             break
 
-        if ("calib.txt" in filename):
-            break
-
         img = mpimg.imread(os.path.join(folder, filename))
 
         if img is not None:
@@ -142,6 +139,7 @@ singleImage = [mpimg.imread('C:/Users/Crolw/OneDrive/Documents/GitHub/lip-readin
 croppedImage = crop(singleImage)
 #cv.imshow('TEST', testImages[10000])
 #cv.imshow('cropped', testImages[10000])
+print(croppedImage.shape)
 cv.imshow('test', croppedImage[0])
 cv.waitKey(0)
 
