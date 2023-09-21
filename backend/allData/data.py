@@ -124,25 +124,54 @@ def load_images(folder, array):
         if ("depth" in filename):
             break
 
-        if ("calib.txt" in filename):
-            break
-
         img = mpimg.imread(os.path.join(folder, filename))
 
         if img is not None:
             array.append(img)
     return array
 
+def loadData(label, labelString):
+    count = 0
+    result = np.empty([2, 1, 1]) # 2: videos/labels, 1: repeat, 1: frames 0-10
 
-#testImages = getAllFolders()
+    for index in range(0, len(label)):
+        expression = label[index]
+        #expLabel = [ i for i, j in locals().items() if j == label][0]
+        for person in range(1, 12):
+            if person == 3:
+                continue
+            for expressionNum in range(1, 11):
+                for repeat in range(1, 11):
+                    # Increase Shape
+
+                    path = os.path.join(basePath, f"F{str(person).zfill(2)}/{labelString}/{str(expressionNum).zfill(2)}/{str(repeat).zfill(2)}")
+                    tempArr = load_images(path, [])
+
+                    result.reshape((-1, -1, (-1 + 1)))
+                    result[0][count] = tempArr
+                    result[1][count] = labelString
+
+                    count += 1
+
+
+testImages = getAllFolders()
 
 #croppedArr = crop(testImages)
 
-singleImage = [mpimg.imread('C:/Users/Crolw/OneDrive/Documents/GitHub/lip-reading/MIRACL-VC1_all_in_one/F01/phrases/01/01/color_011.jpg')]
+singleImage = [mpimg.imread('C:/Users/Crolw/OneDrive/Documents/GitHub/lip-reading/MIRACL-VC1_all_in_one/F01/phrases/03/01/color_001.jpg')]
+print(singleImage)
 croppedImage = crop(singleImage)
+croppedImage = np.array(croppedImage)
 #cv.imshow('TEST', testImages[10000])
 #cv.imshow('cropped', testImages[10000])
+#print(croppedImage)
 cv.imshow('test', croppedImage[0])
 cv.waitKey(0)
+
+#phrasesArr = loadData(phrases, 'phrases')
+#wordsArr = loadData(words, 'words')
+
+#print(phrasesArr.shape)
+#print(wordsArr.shape)
 
 
