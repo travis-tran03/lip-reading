@@ -7,9 +7,9 @@ from keras.layers import Conv2D, Conv3D, ReLU, MaxPool2D, Dense, Flatten, Activa
 
 # image = single image
 def neuralNetwork():
-    '''
+    
     model = models.Sequential([
-        Input(shape= (64, 64, 1)),
+        Input((None, 76, 76, 1)),
 
         TimeDistributed(Conv2D(filters=32, kernel_size=(3, 3), padding='same', strides=(2, 2), activation='relu')),
         TimeDistributed(BatchNormalization()),
@@ -28,28 +28,28 @@ def neuralNetwork():
 
         TimeDistributed(Flatten()),
 
-        Bidirectional(LSTM(32, kernel_initializer='Orthogonal', return_sequences=True)),
+       Bidirectional(LSTM(32, kernel_initializer='Orthogonal', return_sequences=True)),
         Dropout(0.25),
 
-        Dense(20, activation='softmax')
+        Dense(10, activation='softmax')
     ])
+    
     '''
     model = models.Sequential([
-        Input(shape= (None, 64, 64, 1)),
 
-        TimeDistributed(Conv2D(filters=32, kernel_size=(3, 3), padding='same', strides=(2, 2), activation='relu')),
+        Conv2D(filters=32, kernel_size=(3, 3), padding='same', activation='relu', input_shape=(76, 76, 1)),
         BatchNormalization(),
 
-        TimeDistributed(MaxPool2D(pool_size=(2, 2))),
+        MaxPool2D(pool_size=(2, 2)),
         Dropout(0.25),
 
-        TimeDistributed(Conv2D(filters=64, kernel_size=(3, 3), padding='same', strides=(2, 2), activation='relu')),
+        Conv2D(filters=64, kernel_size=(3, 3), padding='same', activation='relu'),
         BatchNormalization(),
 
-        TimeDistributed(MaxPool2D(pool_size=(2, 2))),
+        MaxPool2D(pool_size=(2, 2)),
         Dropout(0.25),
 
-        TimeDistributed(Conv2D(filters=20, kernel_size=(3, 3), padding='same', strides=(2, 2), activation='relu')),
+        Conv2D(filters=32, kernel_size=(3, 3), padding='same', activation='relu'),
         BatchNormalization(),
 
         TimeDistributed(Flatten()),
@@ -57,8 +57,9 @@ def neuralNetwork():
         Bidirectional(LSTM(32, kernel_initializer='Orthogonal', return_sequences=True)),
         Dropout(0.25),
 
-        Dense(20, activation='softmax')
+        Dense(6, activation='softmax')
     ])
+    '''
     # Using Convolutional NN Base
 
     # Sample (WIP Using Keras)

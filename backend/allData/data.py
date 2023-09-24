@@ -5,7 +5,7 @@ import matplotlib.image as mpimg
 import numpy as np
 from dotenv import load_dotenv
 
-from resizing import crop
+from .resizing import crop
 
 
 phrases = ["stop navigation", "excuse me", "i am sorry", "thank you", "good bye", "i love this game", "nice to meet you", "you are welcome", "how are you", "have a good time"]
@@ -14,6 +14,18 @@ words = ["begin", "choose", "connection", "navigation", "next", "previous", "sta
 load_dotenv('backend/.env')
 
 basePath = os.getenv("FOLDERPATH")
+
+def load_images(folder, array):
+    for filename in os.listdir(folder):
+
+        if ("depth" in filename):
+            break
+
+        img = mpimg.imread(os.path.join(folder, filename))
+
+        if img is not None:
+            array.append(img)
+    return array
 
 class Frame:
     def __init__(self, type, id, expression, img):
@@ -118,18 +130,6 @@ def allFolders():
     return allImages
 
 
-def load_images(folder, array):
-    for filename in os.listdir(folder):
-
-        if ("depth" in filename):
-            break
-
-        img = mpimg.imread(os.path.join(folder, filename))
-
-        if img is not None:
-            array.append(img)
-    return array
-
 def loadData(label, labelString):
     count = 0
     result = np.empty([2, 1, 1]) # 2: videos/labels, 1: repeat, 1: frames 0-10
@@ -156,8 +156,10 @@ def loadData(label, labelString):
 
 testImages = getAllFolders()
 
-#croppedArr = crop(testImages)
+croppedArr = crop(testImages)
+croppedArr = np.array(croppedArr)
 
+'''
 singleImage = [mpimg.imread('C:/Users/Crolw/OneDrive/Documents/GitHub/lip-reading/MIRACL-VC1_all_in_one/F01/phrases/03/01/color_001.jpg')]
 print(singleImage)
 croppedImage = crop(singleImage)
@@ -167,7 +169,7 @@ croppedImage = np.array(croppedImage)
 #print(croppedImage)
 cv.imshow('test', croppedImage[0])
 cv.waitKey(0)
-
+'''
 #phrasesArr = loadData(phrases, 'phrases')
 #wordsArr = loadData(words, 'words')
 
