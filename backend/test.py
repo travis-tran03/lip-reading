@@ -1,13 +1,15 @@
 import numpy as np
 import pandas as pd
 import tensorflow as tf
+import os
+import cv2 as cv
 
-p = [[[1, 2, 3, 4, 5], [6, 7, 8, 9, 10]]]
-
-arr = tf.constant(p)
-
-print(arr)
-print(arr.shape)
+folderDir = 'C:/Users/Crolw/OneDrive/Documents/GitHub/lip-reading/backend/model_loss'
+for image in os.listdir(folderDir):
+    if (image.endswith('.png')):
+        img = cv.imread(folderDir + '/' + image)
+        cv.imshow('img', img)
+        cv.waitKey(1000)
 
 
 

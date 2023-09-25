@@ -54,17 +54,18 @@ def getAllFolders():
 
     type = ['phrases', 'words']
     
-    phrasesImgs = manageImgs([], personNum, type[0])
+    phrasesImgs, phrasesLabels = manageImgs([], [], personNum, type[0])
 
-    wordsImgs = manageImgs([], personNum, type[1])
+    wordsImgs, wordsLabels = manageImgs([], [], personNum, type[1])
 
     allImages = phrasesImgs + wordsImgs
+    allLabels = phrasesLabels + wordsLabels
 
-    return allImages
+    return allImages, allLabels
 
-def manageImgs(imgs, personNum, type):
+def manageImgs(imgs, labels, personNum, type):
     if (personNum == 12):
-        return imgs
+        return imgs, labels
     
     if (personNum == 3):
         personNum += 1
@@ -74,17 +75,17 @@ def manageImgs(imgs, personNum, type):
 
     
 
-    imgs = getImgs(imgs, personNum, type, num, repeatNum)
+    imgs, labels = getImgs(imgs, labels, personNum, type, num, repeatNum)
 
     personNum += 1
 
-    imgs = manageImgs(imgs, personNum, type)
+    imgs, labels = manageImgs(imgs, labels, personNum, type)
 
-    return imgs
+    return imgs, labels
 
-def getImgs(imgs, personNum, type, num, repeatNum):
+def getImgs(imgs, labels, personNum, type, num, repeatNum):
     if (num == 10):
-        return imgs
+        return imgs, labels
     
     if (repeatNum > 10):
         num += 1
@@ -93,12 +94,16 @@ def getImgs(imgs, personNum, type, num, repeatNum):
 
     path = os.path.join(basePath, f"F{str(personNum).zfill(2)}/{type}/{str(num).zfill(2)}/{str(repeatNum).zfill(2)}")
     imgs = load_images(path, imgs)
+    if (type == 'phrases'):
+        labels.append(phrases[num-1])
+    if (type == 'words'):
+        labels.append(words[num-1])
 
     repeatNum += 1
 
-    imgs = getImgs(imgs, personNum, type, num, repeatNum)
+    imgs, labels = getImgs(imgs, labels, personNum, type, num, repeatNum)
 
-    return imgs
+    return imgs, labels
 
 def allFolders():
     type = ["phrases", "words"]
@@ -152,28 +157,5 @@ def loadData(label, labelString):
                     result[1][count] = labelString
 
                     count += 1
-
-
-testImages = getAllFolders()
-
-croppedArr = crop(testImages)
-croppedArr = np.array(croppedArr)
-
-'''
-singleImage = [mpimg.imread('C:/Users/Crolw/OneDrive/Documents/GitHub/lip-reading/MIRACL-VC1_all_in_one/F01/phrases/03/01/color_001.jpg')]
-print(singleImage)
-croppedImage = crop(singleImage)
-croppedImage = np.array(croppedImage)
-#cv.imshow('TEST', testImages[10000])
-#cv.imshow('cropped', testImages[10000])
-#print(croppedImage)
-cv.imshow('test', croppedImage[0])
-cv.waitKey(0)
-'''
-#phrasesArr = loadData(phrases, 'phrases')
-#wordsArr = loadData(words, 'words')
-
-#print(phrasesArr.shape)
-#print(wordsArr.shape)
 
 

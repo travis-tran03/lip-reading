@@ -6,9 +6,16 @@ function App() {
   const [number, setNumber] = useState(0);
   const [number2, setNumber2] = useState(0);
 
+  const [array, setArray] = useState([1, 2, 3]);
+
   const add = () => {
     setNumber(number + 1);
-    console.log(number)
+    console.log(number);
+
+   const value = [4, 5]
+
+    const tempArr = array;
+    tempArr[1] = 6; 
   }
 
   useEffect(function () {
@@ -25,6 +32,7 @@ function App() {
       <button onClick={() => {add()}}> Button </button>
     </div>
   );
+
 }
 
 export default App;
