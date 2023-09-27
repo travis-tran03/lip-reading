@@ -9,7 +9,7 @@ from keras.layers import Conv2D, Conv3D, ReLU, MaxPool2D, Dense, Flatten, Activa
 def neuralNetwork():
     
     model = models.Sequential([
-        Input((None, 76, 76, 1)),
+        Input((None, 91, 91, 1)),
 
         TimeDistributed(Conv2D(filters=32, kernel_size=(3, 3), padding='same', strides=(2, 2), activation='relu')),
         TimeDistributed(BatchNormalization()),

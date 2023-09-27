@@ -3,33 +3,46 @@ import './App.css';
 import {useState, useEffect} from 'react'
 
 function App() {
-  const [number, setNumber] = useState(0);
-  const [number2, setNumber2] = useState(0);
+  const basePath = 'C:/Users/Crolw/OneDrive/Documents/GitHub/lip-reading/MIRACL-VC1_all_in_one/'
 
-  const [array, setArray] = useState([1, 2, 3]);
+  const [image, setImage] = useState(0);
 
-  const add = () => {
-    setNumber(number + 1);
-    console.log(number);
+  function pad(num) {
+    return (num < 10) ? '0' + num.toString() : num.toString();
+}
 
-   const value = [4, 5]
-
-    const tempArr = array;
-    tempArr[1] = 6; 
+  const getRandomNumber = (max) => {
+    return Math.floor(Math.random() * max);
   }
 
-  useEffect(function () {
-    setNumber2(number2 + 10);
-    console.log('running')
-  }, [])
+  const predict = () => {
+    const types = ['phrases', 'words'];
 
+    var person = getRandomNumber(10);
+    var expNum = getRandomNumber(10);
+    var repeatNum = getRandomNumber(10);
+    var typeIndex = getRandomNumber(2);
+    var ranNum = getRandomNumber(8);
+
+    while (person == 3)
+      person = getRandomNumber(10);
+
+    const fileName = 'color_0' + `${ranNum}` + '.jpg'
+
+    const path = `F${person}/${types[typeIndex]}/${expNum}/${repeatNum}/color_001.jpg`
+
+    setImage(path);
+  }
+  
   return (
     <div className="App">
       
-      <div>Hello</div>
-      <div>Number: {number}</div>
-      <div>Number 2: {number2}</div>
-      <button onClick={() => {add()}}> Button </button>
+      <div className='image'>
+        <img src={image}/>
+      </div>
+
+      <button className='btn' onClick={predict}> Predict </button>
+
     </div>
   );
 

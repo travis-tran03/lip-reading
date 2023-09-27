@@ -1,11 +1,10 @@
+import os
+
 import numpy as np
-import tensorflow as tf
+
 from keras.callbacks import Callback
 from keras.utils import to_categorical
 from keras.optimizers import Adam
-from network.architecture import neuralNetwork
-from allData.resizing import crop
-import os
 
 import cv2 as cv
 
@@ -14,22 +13,52 @@ import matplotlib.pyplot as plt
 
 import pandas as pd
 
+from network.architecture import neuralNetwork
+from allData.resizing import crop
 import allData.data as dt
 
-#phrases = ["stop navigation", "excuse me", "i am sorry", "thank you", "good bye", "i love this game", "nice to meet you", "you are welcome", "how are you", "have a good time"]
-phrases = ["stop navigation", "excuse me", "i am sorry", "stop navigation", "good bye", "stop navigation", "stop navigation", "you are welcome", "stop navigation", "have a good time"]
+phrases = ["stop navigation", "excuse me", "i am sorry", "thank you", "good bye", "i love this game", "nice to meet you", "you are welcome", "how are you", "have a good time"]
+#phrases = np.array(["stop navigation", "excuse me", "i am sorry", "stop navigation", "good bye", "stop navigation", "stop navigation", "you are welcome", "stop navigation", "have a good time"])
 #phrases = ["stop navigation", "excuse me", "i am sorry", "thank you", "good bye", "i love this game"]
-words = ["begin", "choose", "connection", "navigation", "next", "previous", "start", "stop", "hello", "wed"]
+words = np.array(["begin", "choose", "connection", "navigation", "next", "previous", "start", "stop", "hello", "wed"])
 
-images, labels = dt.getAllFolders()
+def getF1(imgs, labels):
+    basePath = 'C:/Users/Crolw/OneDrive/Documents/GitHub/lip-reading/MIRACL-VC1_all_in_one/'
 
-croppedImgs = crop(images)
+    for i in range(1, 6):
+        if (i == 3):
+            continue
+        for x in range(1, 11):
+            for y in range(1, 11):
+                path = os.path.join(basePath, f"F{str(i).zfill(2)}/phrases/{str(x).zfill(2)}/{str(y).zfill(2)}")
 
-imagesList = [np.array(img) for img in croppedImgs]
+                newImgs = dt.load_images(path, [])
+
+                for j in range(len(newImgs)):
+                    imgs.append(newImgs[j])
+                    labels.append(phrases[x-1])
+    
+    return imgs, labels
+
+#images, labels = dt.getAllFolders()
+#images, labels = dt.allFolders()
+images, labels = getF1([], [])
+
+print(len(images))
+print(len(labels))
+
+#croppedImgs = crop(images)
+
+#print(len(croppedImgs))
+
+
+imagesList = [np.array(img) for img in images]
 
 finalImages = np.stack(imagesList)
 
-labels = np.array(labels)
+imagesList = [np.array(label) for label in labels]
+
+labels = np.array(imagesList)
 
 print(finalImages.shape)
 print(labels.shape)
@@ -73,26 +102,11 @@ class CustomCallBack(Callback):
         plt.title(f'Loss Visualization Keras Callback - Epoch: {epoch}')
         plt.savefig('backend/model_loss/'+self.model_name+"_"+str(epoch))
         plt.close()
-        
 
 
-def load_images(folder, array):
-    for filename in os.listdir(folder):
 
-        if ("depth" in filename):
-            break
-
-        img = mpimg.imread(os.path.join(folder, filename))
-
-        if img is not None:
-            array.append(img)
-
-       
-
-    return array
-
-test = np.array_split(finalImages, 10)
-test2 = np.array_split(labels, 10)
+test = np.array_split(finalImages, 4) # Shape = (10, ~1500, 76, 76, 1)
+test2 = np.array_split(labels, 4) # Shape = (10, ~1500, 76, 76, 1)
 trainImgs = test[0]
 testImgs = test[1]
 trainLabels = test2[0]
@@ -103,37 +117,58 @@ model = neuralNetwork()
 optimizer = Adam(lr=0.001)
 model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
 
-def oneHotEncode(labels):
-    tempPhrases = labels[:]
+def oneHotEncode(type, labels):
+    tempPhrases = list(type)
     unique = np.unique(tempPhrases)
 
     mapping = {}
+    for x in range(len(unique)):
+        mapping[unique[x]] = x
+    '''
     usedNums = np.arange(1, 11)
-    for x in range(len(tempPhrases)):
+    for x in range(len(unique)):
         ranNum = np.random.choice(usedNums, size=1)
-        np.delete(usedNums, np.where(usedNums == ranNum[0]))
-        mapping[tempPhrases[x]] = ranNum[0]
+        usedNums = np.delete(usedNums, np.where(usedNums == ranNum[0]))
+        mapping[unique[x]] = ranNum[0]
+    '''
 
     for x in range(len(tempPhrases)):
         tempPhrases[x] = mapping[tempPhrases[x]]
 
     onehot = to_categorical(tempPhrases, num_classes=10)
 
+    onehotArr = []
+
+    labels = labels.reshape(len(labels), 1)
+
+    tempList = labels.tolist()
+    for i in range(len(type)):
+        for x in np.where(labels == type[i])[0]:
+            tempList[x] = onehot[i]
+
+            
+    onehotArr = np.array(tempList)
+    print(onehotArr.shape)
+
     onehot = onehot.reshape(len(onehot), 1, 10)
 
-    return onehot
+    onehotArr = onehotArr.reshape(len(onehotArr), 1, 10)
 
-onehotTrain = oneHotEncode(trainLabels)
-onehotTest = oneHotEncode(testLabels)
+    print(onehotArr.shape)
 
-history = model.fit(trainImgs.reshape(len(trainImgs), 1, 76, 76, 1), onehotTrain, epochs=10, batch_size=13, callbacks=[CustomCallBack(trainImgs.reshape(-1, 1, 76, 76, 1), onehotTrain, 'Lip Reading')])
+    return onehotArr
 
-score = model.evaluate(testImgs.reshape(len(testImgs), 1, 76, 76, 1), onehotTest, verbose=0)
+onehotTrain = oneHotEncode(phrases, trainLabels)
+onehotTest = oneHotEncode(phrases, testLabels)
+
+history = model.fit(trainImgs.reshape(trainImgs.shape[0], 1, trainImgs.shape[1], trainImgs.shape[1], 1), onehotTrain, epochs=30, batch_size=13, callbacks=[CustomCallBack(trainImgs.reshape(trainImgs.shape[0], 1, trainImgs.shape[1], trainImgs.shape[1], 1), onehotTrain, 'Lip Reading')])
+
+score = model.evaluate(testImgs.reshape(testImgs.shape[0], 1, testImgs.shape[1], testImgs.shape[1], 1), onehotTest, verbose=0)
 
 print('Test Loss: ', score[0])
 print('Test Accuracy: ', score[1])
 
-pred = model.predict(testImgs.reshape(len(testImgs), 1, 76, 76, 1))
+pred = model.predict(testImgs.reshape(testImgs.shape[0], 1, testImgs.shape[1], testImgs.shape[1], 1))
 pred = np.argmax(pred, axis=1)[:5]
 label = np.argmax(onehotTest, axis=1)[:5]
 

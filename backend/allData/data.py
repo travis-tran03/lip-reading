@@ -5,7 +5,7 @@ import matplotlib.image as mpimg
 import numpy as np
 from dotenv import load_dotenv
 
-from .resizing import crop
+from .resizing import crop, cropSingle
 
 
 phrases = ["stop navigation", "excuse me", "i am sorry", "thank you", "good bye", "i love this game", "nice to meet you", "you are welcome", "how are you", "have a good time"]
@@ -23,6 +23,7 @@ def load_images(folder, array):
 
         img = mpimg.imread(os.path.join(folder, filename))
 
+        img = cropSingle(img)
         if img is not None:
             array.append(img)
     return array
@@ -93,11 +94,14 @@ def getImgs(imgs, labels, personNum, type, num, repeatNum):
 
 
     path = os.path.join(basePath, f"F{str(personNum).zfill(2)}/{type}/{str(num).zfill(2)}/{str(repeatNum).zfill(2)}")
-    imgs = load_images(path, imgs)
-    if (type == 'phrases'):
-        labels.append(phrases[num-1])
-    if (type == 'words'):
-        labels.append(words[num-1])
+    newImgs = load_images(path, [])
+
+    for i in range(len(newImgs)):
+        imgs.append(newImgs[i])
+        if (type == 'phrases'):
+            labels.append(phrases[num-1])
+        if (type == 'words'):
+            labels.append(words[num-1])
 
     repeatNum += 1
 
@@ -108,6 +112,7 @@ def getImgs(imgs, labels, personNum, type, num, repeatNum):
 def allFolders():
     type = ["phrases", "words"]
     allImages = []
+    labels = []
 
     print(f"Path .env: ", basePath)
 
@@ -126,13 +131,16 @@ def allFolders():
                     realNum = str(i).zfill(2)
                     path = os.path.join(basePath, f"F{realNum}/{type[j]}/{num1}/{num2}")
                     loadedImgs = load_images(path, [])
-                    for image in loadedImgs:
-                        test = Frame(type[j], i, phrases[phraseIndex], image)
-                        allImages.append(test)
+                    for i in range(len(loadedImgs)):
+                        allImages.append(loadedImgs[i])
+                        if (type == 'phrases'):
+                            labels.append(phrases[num1-1])
+                        if (type == 'words'):
+                            labels.append(words[num1-1])
                     phraseIndex += 1
 
 
-    return allImages
+    return allImages, labels
 
 
 def loadData(label, labelString):
