@@ -161,14 +161,14 @@ def oneHotEncode(type, labels):
 onehotTrain = oneHotEncode(phrases, trainLabels)
 onehotTest = oneHotEncode(phrases, testLabels)
 
-history = model.fit(trainImgs.reshape(trainImgs.shape[0], 1, trainImgs.shape[1], trainImgs.shape[1], 1), onehotTrain, epochs=30, batch_size=13, callbacks=[CustomCallBack(trainImgs.reshape(trainImgs.shape[0], 1, trainImgs.shape[1], trainImgs.shape[1], 1), onehotTrain, 'Lip Reading')])
+history = model.fit(trainImgs.reshape(trainImgs.shape[0], 1, trainImgs.shape[1], trainImgs.shape[1], 1), onehotTrain, epochs=10, batch_size=13, callbacks=[CustomCallBack(trainImgs.reshape(trainImgs.shape[0], 1, trainImgs.shape[1], trainImgs.shape[1], 1), onehotTrain, 'Lip Reading')])
 
 score = model.evaluate(testImgs.reshape(testImgs.shape[0], 1, testImgs.shape[1], testImgs.shape[1], 1), onehotTest, verbose=0)
 
 print('Test Loss: ', score[0])
 print('Test Accuracy: ', score[1])
 
-pred = model.predict(testImgs.reshape(testImgs.shape[0], 1, testImgs.shape[1], testImgs.shape[1], 1))
+pred = model.predict(testImgs.reshape(testImgs.shape[0], 1, testImgs.shape[1], testImgs.shape[1], 1), bacth_size=13)
 pred = np.argmax(pred, axis=1)[:5]
 label = np.argmax(onehotTest, axis=1)[:5]
 
