@@ -205,9 +205,9 @@ history = model.fit(finalImages.reshape(finalImages.shape[0], 1, finalImages.sha
                     callbacks=[CustomCallBack(finalImages.reshape(finalImages.shape[0], 1, finalImages.shape[1], finalImages.shape[1], 1), onehotTrain, 'Lip Reading')],)
 
 print(f'Loss: {history.history["loss"]}')
-print(f'Val_Loss: {history.history["val_loss"]}')
+#print(f'Val_Loss: {history.history["val_loss"]}')
 print(f'Accuracy: {history.history["accuracy"]}')
-print(f'Val_Accuracy: {history.history["val_accuracy"]}')
+#print(f'Val_Accuracy: {history.history["val_accuracy"]}')
 
 plt.plot(history.epoch, history.history['loss'])
 plt.xlim((0, 12))
