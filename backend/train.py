@@ -180,7 +180,7 @@ onehotVal = oneHotEncode(phrases, valLabels)
 
 #finalImages = finalImages.reshape(finalImages.shape[0], 1, finalImages.shape[1], finalImages.shape[1], 1)
 
-history = model.fit(finalImages.reshape(finalImages.shape[0], 1, finalImages.shape[1], finalImages.shape[1], 1), onehotTrain, epochs=10, batch_size=13,
+history = model.fit(finalImages.reshape(finalImages.shape[0], 1, finalImages.shape[1], finalImages.shape[1], 1), onehotTrain, epochs=20, batch_size=13,
                     callbacks=[CustomCallBack(finalImages.reshape(finalImages.shape[0], 1, finalImages.shape[1], finalImages.shape[1], 1), onehotTrain, 'Lip Reading')],
                     validation_data=(valData.reshape(valData.shape[0], 1, valData.shape[1], valData.shape[1], 1), onehotVal),
                     validation_batch_size=13, shuffle='batch_size')
@@ -194,8 +194,8 @@ print(f'Val_Accuracy: {history.history["val_accuracy"]}')
 plt.plot(history.history['loss'], history.history['val_loss'])
 plt.xlim(0, 12)
 plt.ylim(0, 12)
-plt.ylabel('Loss')
-plt.xlabel('Epoch')
+plt.ylabel('Val_Loss')
+plt.xlabel('Loss')
 
 plt.tight_layout()
 plt.title(f'Model Loss')
