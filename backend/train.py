@@ -27,6 +27,9 @@ def getF1(imgs, labels, notCropped):
     testData = []
     testLabel = []
 
+    valData = []
+    valLabel = []
+
     for i in range(1, 6):
         if (i == 3):
             continue
@@ -36,6 +39,10 @@ def getF1(imgs, labels, notCropped):
 
                 newImgs, newNotCropped = dt.load_images(path, [], [])
 
+                if (x > 5 and x < 9):
+                    for j in range(len(newImgs)):
+                        valData.append(newImgs[j])
+                        valLabel.append(phrases[x-1])
                 if (x > 8 and x < 11):
                     for j in range(len(newImgs)):
                         testData.append(newImgs[j])
@@ -48,11 +55,11 @@ def getF1(imgs, labels, notCropped):
                 for k in range(len(newNotCropped)):
                     notCropped.append(newNotCropped[k])
     
-    return imgs, labels, notCropped, testData, testLabel
+    return imgs, labels, notCropped, testData, testLabel, valData, valLabel
 
 #images, labels = dt.getAllFolders()
 #images, labels = dt.allFolders()
-images, labels, notCropped, testImages, testLabel = getF1([], [], [])
+images, labels, notCropped, testImages, testLabel, valData, valLabels = getF1([], [], [])
 
 print(len(images))
 print(len(labels))
@@ -82,7 +89,7 @@ imagesList = [np.array(img) for img in images]
 
 finalImages = np.stack(imagesList)
 
-imagesList = [np.array(label) for label in labels]
+labelsList = [np.array(label) for label in labels]
 
 labels = np.stack(imagesList)
 
@@ -90,9 +97,17 @@ imagesList = [np.array(img) for img in testImages]
 
 testImages = np.stack(imagesList)
 
-imagesList = [np.array(label) for label in testLabel]
+labelsList = [np.array(label) for label in testLabel]
 
 testLabel = np.stack(imagesList)
+
+imagesList = [np.array(img) for img in valData]
+
+valData = np.stack(imagesList)
+
+labelsList = [np.array(label) for label in valLabels]
+
+valLabels = np.stack(imagesList)
 
 print(finalImages.shape)
 print(labels.shape)
@@ -194,20 +209,19 @@ model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['ac
 
 onehotTrain = oneHotEncode(phrases, labels)
 onehotTest = oneHotEncode(phrases, testLabel)
+onehotVal = oneHotEncode(phrases, valLabels)
 
-'''
+
 history = model.fit(finalImages.reshape(finalImages.shape[0], 1, finalImages.shape[1], finalImages.shape[1], 1), onehotTrain, epochs=10, batch_size=13,
                     callbacks=[CustomCallBack(finalImages.reshape(finalImages.shape[0], 1, finalImages.shape[1], finalImages.shape[1], 1), onehotTrain, 'Lip Reading')],
-                    validation_data=0.1,
+                    validation_data=(valData, valLabels),
                     validation_batch_size=13, shuffle='batch_size')
-'''
-history = model.fit(finalImages.reshape(finalImages.shape[0], 1, finalImages.shape[1], finalImages.shape[1], 1), onehotTrain, epochs=10, batch_size=13,
-                    callbacks=[CustomCallBack(finalImages.reshape(finalImages.shape[0], 1, finalImages.shape[1], finalImages.shape[1], 1), onehotTrain, 'Lip Reading')],)
+
 
 print(f'Loss: {history.history["loss"]}')
-#print(f'Val_Loss: {history.history["val_loss"]}')
+print(f'Val_Loss: {history.history["val_loss"]}')
 print(f'Accuracy: {history.history["accuracy"]}')
-#print(f'Val_Accuracy: {history.history["val_accuracy"]}')
+print(f'Val_Accuracy: {history.history["val_accuracy"]}')
 
 plt.plot(history.epoch, history.history['loss'])
 plt.xlim((0, 12))
