@@ -30,9 +30,6 @@ def neuralNetwork():
         TimeDistributed(MaxPool2D(pool_size=(2, 2))),
         TimeDistributed(Dropout(0.50)),
 
-        TimeDistributed(Conv2D(filters=16, kernel_size=(3, 3), padding='same', strides=(2, 2), activation='relu')),
-        TimeDistributed(BatchNormalization()),
-
         TimeDistributed(Flatten()),
         #Flatten turns the 2D shape input that we have and converts it into a 1D shape (basically a long line of pixels)
 
