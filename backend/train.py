@@ -22,8 +22,10 @@ phrases = ["stop navigation", "excuse me", "i am sorry", "thank you", "good bye"
 #phrases = ["stop navigation", "excuse me", "i am sorry", "thank you", "good bye", "i love this game"]
 words = np.array(["begin", "choose", "connection", "navigation", "next", "previous", "start", "stop", "hello", "wed"])
 
-def getF1(imgs, labels):
+def getF1(imgs, labels, notCropped):
     basePath = 'C:/Users/Crolw/OneDrive/Documents/GitHub/lip-reading/MIRACL-VC1_all_in_one/'
+    testData = []
+    testLabel = []
 
     for i in range(1, 6):
         if (i == 3):
@@ -32,21 +34,45 @@ def getF1(imgs, labels):
             for y in range(1, 11):
                 path = os.path.join(basePath, f"F{str(i).zfill(2)}/phrases/{str(x).zfill(2)}/{str(y).zfill(2)}")
 
-                newImgs = dt.load_images(path, [])
+                newImgs, newNotCropped = dt.load_images(path, [], [])
 
-                for j in range(len(newImgs)):
-                    imgs.append(newImgs[j])
-                    labels.append(phrases[x-1])
+                if (x > 8 and x < 11):
+                    for j in range(len(newImgs)):
+                        testData.append(newImgs[j])
+                        testLabel.append(phrases[x-1])
+                else:
+                    for j in range(len(newImgs)):
+                        imgs.append(newImgs[j])
+                        labels.append(phrases[x-1])
+                
+                for k in range(len(newNotCropped)):
+                    notCropped.append(newNotCropped[k])
     
-    return imgs, labels
+    return imgs, labels, notCropped, testData, testLabel
 
 #images, labels = dt.getAllFolders()
 #images, labels = dt.allFolders()
-images, labels = getF1([], [])
+images, labels, notCropped, testImages, testLabel = getF1([], [], [])
 
 print(len(images))
 print(len(labels))
+print(len(notCropped))
+print(len(testImages))
+print(len(testImages))
 
+'''
+for frame in notCropped:
+    cv.imshow('cropImg', frame['img'])
+    cv.imshow('otherCrop', frame['cropImg'])
+    cv.waitKey(0)
+'''
+'''
+for frame in notCropped:
+    cv.imshow(f'img at index: {frame["index"]}', frame['img'])
+    cv.imshow(f'greyImg at index: {frame["index"]}', frame['greyImg'])
+    cv.imshow(f'cropImg at index: {frame["index"]}', frame['cropImg'])
+    cv.waitKey(0)
+'''
 #croppedImgs = crop(images)
 
 #print(len(croppedImgs))
@@ -58,7 +84,15 @@ finalImages = np.stack(imagesList)
 
 imagesList = [np.array(label) for label in labels]
 
-labels = np.array(imagesList)
+labels = np.stack(imagesList)
+
+imagesList = [np.array(img) for img in testImages]
+
+testImages = np.stack(imagesList)
+
+imagesList = [np.array(label) for label in testLabel]
+
+testLabel = np.stack(imagesList)
 
 print(finalImages.shape)
 print(labels.shape)
@@ -103,20 +137,6 @@ class CustomCallBack(Callback):
         plt.savefig('backend/model_loss/'+self.model_name+"_"+str(epoch))
         plt.close()
 
-
-
-test = np.array_split(finalImages, 4) # Shape = (10, ~1500, 76, 76, 1)
-test2 = np.array_split(labels, 4) # Shape = (10, ~1500, 76, 76, 1)
-trainImgs = test[0]
-testImgs = test[1]
-trainLabels = test2[0]
-testLabels = test2[1]
-
-model = neuralNetwork()
-
-optimizer = Adam(lr=0.001)
-model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
-
 def oneHotEncode(type, labels):
     tempPhrases = list(type)
     unique = np.unique(tempPhrases)
@@ -158,20 +178,59 @@ def oneHotEncode(type, labels):
 
     return onehotArr
 
-onehotTrain = oneHotEncode(phrases, trainLabels)
-onehotTest = oneHotEncode(phrases, testLabels)
+'''
+test = np.array_split(finalImages, 4) # Shape = (10, ~1500, 76, 76, 1)
+test2 = np.array_split(labels, 4) # Shape = (10, ~1500, 76, 76, 1)
+trainImgs = test[0]
+testImgs = test[1]
+trainLabels = test2[0]
+testLabels = test2[1]
+'''
 
-history = model.fit(trainImgs.reshape(trainImgs.shape[0], 1, trainImgs.shape[1], trainImgs.shape[1], 1), onehotTrain, epochs=10, batch_size=13, callbacks=[CustomCallBack(trainImgs.reshape(trainImgs.shape[0], 1, trainImgs.shape[1], trainImgs.shape[1], 1), onehotTrain, 'Lip Reading')])
+model = neuralNetwork()
 
-score = model.evaluate(testImgs.reshape(testImgs.shape[0], 1, testImgs.shape[1], testImgs.shape[1], 1), onehotTest, verbose=0)
+optimizer = Adam(lr=0.001)
+model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
+
+onehotTrain = oneHotEncode(phrases, labels)
+onehotTest = oneHotEncode(phrases, testLabel)
+
+'''
+history = model.fit(finalImages.reshape(finalImages.shape[0], 1, finalImages.shape[1], finalImages.shape[1], 1), onehotTrain, epochs=10, batch_size=13,
+                    callbacks=[CustomCallBack(finalImages.reshape(finalImages.shape[0], 1, finalImages.shape[1], finalImages.shape[1], 1), onehotTrain, 'Lip Reading')],
+                    validation_data=0.1,
+                    validation_batch_size=13, shuffle='batch_size')
+'''
+history = model.fit(finalImages.reshape(finalImages.shape[0], 1, finalImages.shape[1], finalImages.shape[1], 1), onehotTrain, epochs=10, batch_size=13,
+                    callbacks=[CustomCallBack(finalImages.reshape(finalImages.shape[0], 1, finalImages.shape[1], finalImages.shape[1], 1), onehotTrain, 'Lip Reading')],)
+
+print(f'Loss: {history.history["loss"]}')
+print(f'Val_Loss: {history.history["val_loss"]}')
+print(f'Accuracy: {history.history["accuracy"]}')
+print(f'Val_Accuracy: {history.history["val_accuracy"]}')
+
+plt.plot(history.epoch, history.history['loss'])
+plt.xlim((0, 12))
+plt.ylim((0, 12))
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+
+plt.tight_layout()
+plt.title(f'Epoch vs Loss (Train)')
+plt.savefig('backend/Histroy_Train')
+plt.show()
+plt.close()
+
+score = model.evaluate(testImages.reshape(testImages.shape[0], 1, testImages.shape[1], testImages.shape[1], 1), onehotTest, verbose=0)
 
 print('Test Loss: ', score[0])
 print('Test Accuracy: ', score[1])
 
+'''
 pred = model.predict(testImgs.reshape(testImgs.shape[0], 1, testImgs.shape[1], testImgs.shape[1], 1), bacth_size=13)
 pred = np.argmax(pred, axis=1)[:5]
 label = np.argmax(onehotTest, axis=1)[:5]
 
 print('Prediction: ', pred)
 print('Actual Label: ', label)
-
+'''

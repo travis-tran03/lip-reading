@@ -15,7 +15,7 @@ load_dotenv('backend/.env')
 
 basePath = os.getenv("FOLDERPATH")
 
-def load_images(folder, array):
+def load_images(folder, array, notCropped):
     for filename in os.listdir(folder):
 
         if ("depth" in filename):
@@ -23,10 +23,28 @@ def load_images(folder, array):
 
         img = mpimg.imread(os.path.join(folder, filename))
 
-        img = cropSingle(img)
-        if img is not None:
-            array.append(img)
-    return array
+        greyImg = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+
+        cropImg = cropSingle(greyImg, (90, 90))
+        if cropImg is not None:
+            array.append(cropImg)
+        else:
+            cropImg = cropSingle(greyImg, (100, 100))
+            
+            '''
+            (width, height) = np.array(cropImg).shape
+            left = int((width-10))
+            right = int((height-10))
+            print(f'left: {left} : right: {right}')
+            otherCrop = cropImg[0:height, 0: width]
+            '''
+            if (len(notCropped) > 0):
+            
+                notCropped.append({'img': img, 'greyImg': greyImg, 'cropImg': cropImg, 'index': (notCropped[-1]['index'] + 1)})
+            else:
+                notCropped.append({'img': img, 'greyImg': greyImg, 'cropImg': cropImg, 'index': len(array)})
+
+    return array, notCropped
 
 class Frame:
     def __init__(self, type, id, expression, img):
