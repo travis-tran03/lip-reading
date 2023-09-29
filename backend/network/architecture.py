@@ -19,18 +19,18 @@ def neuralNetwork():
         #relu makes every negative value 0 for easier data managing 
 
         TimeDistributed(MaxPool2D(pool_size=(2, 2))),
-        TimeDistributed(Dropout(0.25)),
+        TimeDistributed(Dropout(0.50)),
         #maxpooling downscales the image and extracts the max value according to the filter  
         #0.25 sets the dropout rate meaning a percentage of the inputs will be removed. 
 
-        TimeDistributed(Conv2D(filters=64, kernel_size=(3, 3), padding='same', strides=(2, 2), activation='relu')),
+        TimeDistributed(Conv2D(filters=32, kernel_size=(3, 3), padding='same', strides=(2, 2), activation='relu')),
         TimeDistributed(BatchNormalization()),
 
 
         TimeDistributed(MaxPool2D(pool_size=(2, 2))),
-        TimeDistributed(Dropout(0.25)),
+        TimeDistributed(Dropout(0.50)),
 
-        TimeDistributed(Conv2D(filters=20, kernel_size=(3, 3), padding='same', strides=(2, 2), activation='relu')),
+        TimeDistributed(Conv2D(filters=16, kernel_size=(3, 3), padding='same', strides=(2, 2), activation='relu')),
         TimeDistributed(BatchNormalization()),
 
         TimeDistributed(Flatten()),
@@ -39,7 +39,7 @@ def neuralNetwork():
 
 
        Bidirectional(LSTM(32, kernel_initializer='Orthogonal', return_sequences=True)),
-        Dropout(0.25),
+        Dropout(0.50),
         #32 LSTM cells help process information in our data
 
         Dense(10, activation='softmax')
