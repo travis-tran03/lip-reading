@@ -1,6 +1,7 @@
 import logo from './logo.svg';
 import './App.css';
 import {useState, useEffect} from 'react'
+import Images from './frontPage';
 
 
 function App() {
@@ -38,7 +39,9 @@ function App() {
   
   return (
     <div className="App">
+    <h1>Lip Interpretation Process</h1>
       
+      <Images/>
       <div className='image'>
         <img src={image}/>
       </div>
