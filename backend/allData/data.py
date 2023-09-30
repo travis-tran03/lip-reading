@@ -1,5 +1,4 @@
 import cv2 as cv
-import glob
 import os
 import matplotlib.image as mpimg
 import numpy as np
@@ -27,17 +26,19 @@ def load_images(folder, array, notCropped):
 
         cropImg = cropSingle(greyImg, (90, 90))
         if cropImg is not None:
+            (width, height) = np.array(cropImg).shape
+            left = int(width/2)
+            right = int(height/2)
+            left2 = int(left/2)
+            left3 = int((left+(left/2)))
+            cropImg = cropImg[right:height, left2:left3]
+            cropImg = cv.resize(cropImg, (91, 91))
+
             array.append(cropImg)
         else:
             cropImg = cropSingle(greyImg, (100, 100))
             
-            '''
-            (width, height) = np.array(cropImg).shape
-            left = int((width-10))
-            right = int((height-10))
-            print(f'left: {left} : right: {right}')
-            otherCrop = cropImg[0:height, 0: width]
-            '''
+            
             if (len(notCropped) > 0):
             
                 notCropped.append({'img': img, 'greyImg': greyImg, 'cropImg': cropImg, 'index': (notCropped[-1]['index'] + 1)})
