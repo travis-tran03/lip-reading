@@ -3,13 +3,24 @@ import pandas as pd
 import tensorflow as tf
 import os
 import cv2 as cv
+import matplotlib.pyplot as plt
 
-arr = np.array([1, 2, 2, 3, 2, 3, 5, 4])
+path = 'C:/Users/Crolw/OneDrive/Documents/GitHub/lip-reading/backend/Histroy_TrainVal.png'
 
-for x in range(len(arr)):
-    arr[:'2'] = 7
+img = cv.imread(path)
 
-print(arr)
+greyImg = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+
+(width, height) = np.array(greyImg).shape
+left = int((width-10))
+right = int((height-500))
+print(f'left: {left} : right: {right}')
+cropImg = img[right:height, 0: left]
+
+cv.imshow('greyimg', greyImg)
+cv.imshow('cropImg', cropImg)
+cv.waitKey(0)
+
 '''
 folderDir = 'C:/Users/Crolw/OneDrive/Documents/GitHub/lip-reading/backend/model_loss'
 for image in os.listdir(folderDir):

@@ -2,6 +2,7 @@ import logo from './logo.svg';
 import './App.css';
 import {useState, useEffect} from 'react'
 
+
 function App() {
   const basePath = 'C:/Users/Crolw/OneDrive/Documents/GitHub/lip-reading/MIRACL-VC1_all_in_one/'
 
@@ -16,6 +17,7 @@ function App() {
   }
 
   const predict = () => {
+    console.log(image)
     const types = ['phrases', 'words'];
 
     var person = getRandomNumber(10);

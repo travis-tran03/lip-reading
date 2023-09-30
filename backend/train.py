@@ -85,7 +85,7 @@ def getData():
 
                 newImgs, newNotCropped = dt.load_images(path, [], [])
 
-                if (x > 5 and x < 9):
+                if (x > 6 and x < 9):
                     for j in range(len(newImgs)):
                         valData.append(newImgs[j])
                         valLabel.append(phrases[x-1])
@@ -133,19 +133,7 @@ def oneHotEncode(type, labels):
     onehotArr = onehotArr.reshape(len(onehotArr), 1, 10)
 
     return onehotArr
-'''
-for frame in notCropped:
-    cv.imshow('cropImg', frame['img'])
-    cv.imshow('otherCrop', frame['cropImg'])
-    cv.waitKey(0)
-'''
-'''
-for frame in notCropped:
-    cv.imshow(f'img at index: {frame["index"]}', frame['img'])
-    cv.imshow(f'greyImg at index: {frame["index"]}', frame['greyImg'])
-    cv.imshow(f'cropImg at index: {frame["index"]}', frame['cropImg'])
-    cv.waitKey(0)
-'''
+
 def convertToNumpy(arr):
     arrList = [np.array(item) for item in arr]
 
@@ -155,47 +143,58 @@ def convertToNumpy(arr):
 
 #images, labels = dt.getAllFolders()
 #images, labels = dt.allFolders()
-images, labels, notCropped, testImages, testLabel, valData, valLabels = getData()
+trainImages, trainLabels, notCropped, testImages, testLabels, validationImages, validationLabels = getData()
 
-finalImages = convertToNumpy(images)
+trainImages = convertToNumpy(trainImages)
 
-labels = convertToNumpy(labels)
+cv.imshow('img', trainImages[12])
+cv.waitKey(0)
+
+trainLabels = convertToNumpy(trainLabels)
 
 testImages = convertToNumpy(testImages)
 
-testLabel = convertToNumpy(testLabel)
+testLabels = convertToNumpy(testLabels)
 
-valData = convertToNumpy(valData)
+validationImages = convertToNumpy(validationImages)
 
-valLabels = convertToNumpy(valLabels)
+validationLabels = convertToNumpy(validationLabels)
 
 model = neuralNetwork()
 
 optimizer = Adam(lr=0.001)
 model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
 
-onehotTrain = oneHotEncode(phrases, labels)
-onehotTest = oneHotEncode(phrases, testLabel)
-onehotVal = oneHotEncode(phrases, valLabels)
+onehotTrain = oneHotEncode(phrases, trainLabels)
+onehotTest = oneHotEncode(phrases, testLabels)
+onehotValidation = oneHotEncode(phrases, validationLabels)
 
-#finalImages = finalImages.reshape(finalImages.shape[0], 1, finalImages.shape[1], finalImages.shape[1], 1)
+trainImages = trainImages.reshape(trainImages.shape[0], 1, trainImages.shape[1], trainImages.shape[1], 1)
+validationImages = validationImages.reshape(validationImages.shape[0], 1, validationImages.shape[1], validationImages.shape[1], 1)
+testImages = testImages.reshape(testImages.shape[0], 1, testImages.shape[1], testImages.shape[1], 1)
 
-history = model.fit(finalImages.reshape(finalImages.shape[0], 1, finalImages.shape[1], finalImages.shape[1], 1), onehotTrain, epochs=20, batch_size=13,
-                    callbacks=[CustomCallBack(finalImages.reshape(finalImages.shape[0], 1, finalImages.shape[1], finalImages.shape[1], 1), onehotTrain, 'Lip Reading')],
-                    validation_data=(valData.reshape(valData.shape[0], 1, valData.shape[1], valData.shape[1], 1), onehotVal),
+history = model.fit(trainImages, onehotTrain, epochs=60, batch_size=13,
+                    callbacks=[CustomCallBack(trainImages, onehotTrain, 'Lip Reading')],
+                    validation_data=(validationImages, onehotValidation),
                     validation_batch_size=13, shuffle='batch_size')
-
 
 print(f'Loss: {history.history["loss"]}')
 print(f'Val_Loss: {history.history["val_loss"]}')
 print(f'Accuracy: {history.history["accuracy"]}')
 print(f'Val_Accuracy: {history.history["val_accuracy"]}')
 
-plt.plot(history.history['loss'], history.history['val_loss'])
-plt.xlim(0, 12)
-plt.ylim(0, 12)
+x = history.epoch
+
+plt.plot(x, history.history['loss'], label='Training Loss')
+plt.plot(x, history.history['val_loss'], label='Validation Loss')
+plt.plot(x, history.history['accuracy'], label='Training Accuracy')
+plt.plot(x, history.history['val_accuracy'], label='Validation Accuracy')
+
+plt.xlim(0, 60)
+plt.ylim(0, 20)
 plt.ylabel('Val_Loss')
 plt.xlabel('Loss')
+plt.legend()
 
 plt.tight_layout()
 plt.title(f'Model Loss')
@@ -203,10 +202,12 @@ plt.savefig('backend/Histroy_TrainVal')
 plt.show()
 plt.close()
 
-score = model.evaluate(testImages.reshape(testImages.shape[0], 1, testImages.shape[1], testImages.shape[1], 1), onehotTest, verbose=0)
+score = model.evaluate(testImages, onehotTest, verbose=0)
 
 print('Test Loss: ', score[0])
 print('Test Accuracy: ', score[1])
+
+#model.save('./model.keras')
 
 '''
 pred = model.predict(testImgs.reshape(testImgs.shape[0], 1, testImgs.shape[1], testImgs.shape[1], 1), bacth_size=13)
