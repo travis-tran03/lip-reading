@@ -2,7 +2,7 @@ import os
 
 import numpy as np
 
-from keras.callbacks import Callback
+from keras.callbacks import Callback, EarlyStopping
 from keras.utils import to_categorical
 from keras.optimizers import Adam
 
@@ -18,49 +18,63 @@ from allData.resizing import crop
 import allData.data as dt
 
 phrases = ["stop navigation", "excuse me", "i am sorry", "thank you", "good bye", "i love this game", "nice to meet you", "you are welcome", "how are you", "have a good time"]
-#phrases = np.array(["stop navigation", "excuse me", "i am sorry", "stop navigation", "good bye", "stop navigation", "stop navigation", "you are welcome", "stop navigation", "have a good time"])
-#phrases = ["stop navigation", "excuse me", "i am sorry", "thank you", "good bye", "i love this game"]
 words = np.array(["begin", "choose", "connection", "navigation", "next", "previous", "start", "stop", "hello", "wed"])
 
-class CustomCallBack(Callback):
-    def __init__(self, x_test, y_test, model_name):
-        self.x_test = x_test
-        self.y_test = y_test
-        self.model_name = model_name
-        
-    def on_epoch_end(self, epoch, logs={}):
-        y_pred = self.model.predict(self.x_test)
-        fig, ax = plt.subplots(figsize=(8,4))
-        plt.scatter(self.y_test, y_pred, alpha=0.6, 
-            color='#FF0000', lw=1, ec='black')
-        
-        lims = [0, 5]
+SEQUENCE_LENTH = 10
 
-        plt.plot(lims, lims, lw=1, color='#0000FF')
-        plt.ticklabel_format(useOffset=False, style='plain')
-        plt.xticks(fontsize=18)
-        plt.yticks(fontsize=18)
-        plt.xlim(lims)
-        plt.ylim(lims)
+def data():
+    basePath = 'C:/Users/Crolw/OneDrive/Documents/GitHub/lip-reading/MIRACL-VC1_all_in_one/'
 
-        plt.tight_layout()
-        plt.title(f'Prediction Visualization Keras Callback - Epoch: {epoch}')
-        plt.savefig('backend/model_train_images/'+self.model_name+"_"+str(epoch))
-        plt.close()
+    imgs = []
+    labels = []
 
-        plt.scatter(epoch, logs['loss'], alpha=0.6, 
-            color='#FF0000', lw=1, ec='black')
-        plt.plot([0, 40], [0, 7], color='#0000FF')
-        plt.ticklabel_format(useOffset=False, style='plain')
-        plt.xticks(fontsize=18)
-        plt.yticks(fontsize=18)
-        plt.xlim([0, 40])
-        plt.ylim([0, 7])
+    notCropped = []
 
-        plt.tight_layout()
-        plt.title(f'Loss Visualization Keras Callback - Epoch: {epoch}')
-        plt.savefig('backend/model_loss/'+self.model_name+"_"+str(epoch))
-        plt.close()
+    testData = []
+    testLabel = []
+
+    valData = []
+    valLabel = []
+
+    for i in range(1, 11): # Person
+        if (i==3):
+            continue
+        for x in range(1, 11): # Phrase Number
+            for y in range(1, 11): # Repeat Number
+                path = os.path.join(basePath, f"F{str(i).zfill(2)}/phrases/{str(x).zfill(2)}/{str(y).zfill(2)}") # Full FIle Path
+
+                newImgs, newNotCropped = dt.load_images(path, [], [])
+                
+                frames = []
+
+                skipFrames = max(int(len(newImgs) / SEQUENCE_LENTH), 1)
+
+                for frameCount in range(SEQUENCE_LENTH):
+                    index = frameCount*skipFrames
+
+                    if index > len(newImgs)-1:
+                        break
+
+
+                    frame = newImgs[index]
+
+                    frames.append(frame)
+
+                if len(frames) == SEQUENCE_LENTH:
+                    if (x == 9):
+                        valData.append(frames)
+                        valLabel.append(phrases[x-1])
+                    elif (x == 10):
+                        testData.append(frames)
+                        testLabel.append(phrases[x-1])
+                    else:
+                        imgs.append(frames)
+                        labels.append(phrases[x-1])
+                
+                for k in range(len(newNotCropped)):
+                    notCropped.append(newNotCropped[k])
+
+    return imgs, labels, notCropped, testData, testLabel, valData, valLabel
 
 def getData():
     basePath = 'C:/Users/Crolw/OneDrive/Documents/GitHub/lip-reading/MIRACL-VC1_all_in_one/'
@@ -84,6 +98,8 @@ def getData():
                 path = os.path.join(basePath, f"F{str(i).zfill(2)}/phrases/{str(x).zfill(2)}/{str(y).zfill(2)}")
 
                 newImgs, newNotCropped = dt.load_images(path, [], [])
+
+
 
                 if (x > 6 and x < 9):
                     for j in range(len(newImgs)):
@@ -128,9 +144,9 @@ def oneHotEncode(type, labels):
             
     onehotArr = np.array(tempList)
 
-    onehot = onehot.reshape(len(onehot), 1, 10)
+    onehot = onehot.reshape(len(onehot), 10)
 
-    onehotArr = onehotArr.reshape(len(onehotArr), 1, 10)
+    onehotArr = onehotArr.reshape(len(onehotArr), 10)
 
     return onehotArr
 
@@ -141,13 +157,16 @@ def convertToNumpy(arr):
 
     return finalList
 
-#images, labels = dt.getAllFolders()
-#images, labels = dt.allFolders()
-trainImages, trainLabels, notCropped, testImages, testLabels, validationImages, validationLabels = getData()
+features = []
+labels = []
+
+# Index 1 = # of Videos, Index 2: Frames (10), Index 3: Frame Number / Frame Img (91, 91)
+
+trainImages, trainLabels, notCropped, testImages, testLabels, validationImages, validationLabels = data()
 
 trainImages = convertToNumpy(trainImages)
 
-cv.imshow('img', trainImages[12])
+cv.imshow('img', trainImages[12][4])
 cv.waitKey(0)
 
 trainLabels = convertToNumpy(trainLabels)
@@ -160,7 +179,9 @@ validationImages = convertToNumpy(validationImages)
 
 validationLabels = convertToNumpy(validationLabels)
 
-model = neuralNetwork()
+print(trainImages.shape)
+
+model = neuralNetwork(trainImages.shape[1], trainImages.shape[2], trainImages.shape[3])
 
 optimizer = Adam(lr=0.001)
 model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
@@ -169,14 +190,19 @@ onehotTrain = oneHotEncode(phrases, trainLabels)
 onehotTest = oneHotEncode(phrases, testLabels)
 onehotValidation = oneHotEncode(phrases, validationLabels)
 
-trainImages = trainImages.reshape(trainImages.shape[0], 1, trainImages.shape[1], trainImages.shape[1], 1)
-validationImages = validationImages.reshape(validationImages.shape[0], 1, validationImages.shape[1], validationImages.shape[1], 1)
-testImages = testImages.reshape(testImages.shape[0], 1, testImages.shape[1], testImages.shape[1], 1)
+'''
+trainImages = trainImages.reshape(trainImages.shape[0], 13, trainImages.shape[1], trainImages.shape[1], 1)
+validationImages = validationImages.reshape(validationImages.shape[0], 13, validationImages.shape[1], validationImages.shape[1], 1)
+testImages = testImages.reshape(testImages.shape[0], 13, testImages.shape[1], testImages.shape[1], 1)
+'''
 
-history = model.fit(trainImages, onehotTrain, epochs=60, batch_size=13,
-                    callbacks=[CustomCallBack(trainImages, onehotTrain, 'Lip Reading')],
+earlyStoppiingCallback = EarlyStopping(monitor='val_loss', patience=10, mode='min', restore_best_weights=True)
+
+
+history = model.fit(trainImages, onehotTrain, epochs=50, batch_size=8,
+                    callbacks=[earlyStoppiingCallback],
                     validation_data=(validationImages, onehotValidation),
-                    validation_batch_size=13, shuffle='batch_size')
+                    validation_batch_size=8, shuffle='batch_size')
 
 print(f'Loss: {history.history["loss"]}')
 print(f'Val_Loss: {history.history["val_loss"]}')

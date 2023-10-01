@@ -3,18 +3,38 @@ import tensorflow as tf
 from tensorflow import nn # nn = NeuralNetwork
 from keras import layers, models, Input
 from keras.layers import Conv2D, Conv3D, ReLU, MaxPool2D, Dense, Flatten, Activation, Dropout, BatchNormalization, LSTM, TimeDistributed, Bidirectional
+from keras.layers import ConvLSTM2D, MaxPool3D
 from keras.regularizers import L2
 
 # image = single image
 
-def neuralNetwork():
+def neuralNetwork(seqLen, imgHeight, imgWidth):
 
-    
+    model = models.Sequential([
+        ConvLSTM2D(filters=4, kernel_size=(3, 3), activation='relu', recurrent_dropout=0.3, return_sequences=True, 
+                   input_shape=(seqLen, imgHeight, imgWidth, 1)),
+        MaxPool3D(pool_size=(1, 2, 2), padding='same'),
+        TimeDistributed(Dropout(0.3)),
+
+        ConvLSTM2D(filters=8, kernel_size=(3, 3), activation='relu', recurrent_dropout=0.3, return_sequences=True, 
+                   input_shape=(seqLen, imgHeight, imgWidth, 1)),
+        MaxPool3D(pool_size=(1, 2, 2), padding='same'),
+        TimeDistributed(Dropout(0.3)),
+
+        ConvLSTM2D(filters=16, kernel_size=(3, 3), activation='relu', recurrent_dropout=0.3, return_sequences=True, 
+                   input_shape=(seqLen, imgHeight, imgWidth, 1)),
+        MaxPool3D(pool_size=(1, 2, 2), padding='same'),
+        TimeDistributed(Dropout(0.3)),
+
+        Flatten(),
+        Dense(10, activation='softmax')
+    ])
+    '''
     model = models.Sequential([
         Input((None, 91, 91, 1)),
         #input layer of neural network with 91 by 91 image and is a grayscale image with 1 channel
 
-        TimeDistributed(Conv2D(filters=16, kernel_size=(3, 3), kernel_regularizer=L2(0.01), bias_regularizer=L2(0.01), padding='same', strides=2, activation='relu')),
+        TimeDistributed(Conv2D(filters=32, kernel_size=(3, 3), kernel_regularizer=L2(0.01), bias_regularizer=L2(0.01), padding='same', strides=2, activation='relu')),
         TimeDistributed(BatchNormalization()),
         #2d convolutional layer (stack of filtering images) for neural network with 32 filters and a 3x3 kernel size. 
         #padding ensures that the output has the same dimensions as the input 
@@ -29,7 +49,7 @@ def neuralNetwork():
         #padding ensures that the output has the same dimensions as the input 
         #relu makes every negative value 0 for easier data managing 
 
-        TimeDistributed(Conv2D(filters=32, kernel_size=(3, 3), kernel_regularizer=L2(0.01), bias_regularizer=L2(0.01), padding='same', strides=2, activation='relu')),
+        TimeDistributed(Conv2D(filters=10, kernel_size=(3, 3), kernel_regularizer=L2(0.01), bias_regularizer=L2(0.01), padding='same', strides=2, activation='relu')),
         TimeDistributed(BatchNormalization()),
 
         TimeDistributed(MaxPool2D(pool_size=(2, 2))),
@@ -48,8 +68,7 @@ def neuralNetwork():
         #10 dense neurons in each layer and is connected to previous layers. 
 
     ])
-
-    '''
+ 
     model = models.Sequential([
 
         Conv2D(filters=32, kernel_size=(3, 3), padding='same', activation='relu', input_shape=(76, 76, 1)),
