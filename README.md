@@ -9,6 +9,12 @@ Copy repo URL, Run
 
 ---
 
+### Download Dataset
+The dataset we used was the following:
+#### https://sites.google.com/site/achrafbenhamadou/-datasets/miracl-vc1?authuser=0
+
+---
+
 ### Create virtual environemnt
 cd into the new cloned directory, Run
 #### python -m venv [venvNAME]
