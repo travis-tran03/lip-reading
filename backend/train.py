@@ -1,8 +1,9 @@
 import os
+from dotenv import load_dotenv
 
 import numpy as np
 
-from keras.callbacks import Callback, EarlyStopping
+from keras.callbacks import Callback, EarlyStopping, ModelCheckpoint
 from keras.utils import to_categorical
 from keras.optimizers import Adam
 
@@ -13,18 +14,26 @@ import matplotlib.pyplot as plt
 
 import pandas as pd
 
-from network.architecture import neuralNetwork
+#from network.architecture import neuralNetwork
+from network.arch import neuralNetwork
 from allData.resizing import crop
 import allData.data as dt
+
+df = pd.DataFrame(columns=['Phrases', 'Words'])
 
 phrases = ["stop navigation", "excuse me", "i am sorry", "thank you", "good bye", "i love this game", "nice to meet you", "you are welcome", "how are you", "have a good time"]
 words = np.array(["begin", "choose", "connection", "navigation", "next", "previous", "start", "stop", "hello", "wed"])
 
-SEQUENCE_LENTH = 10
+df['Phrases'] = phrases
+df['Words'] = words
+
+SEQUENCE_LENTH = 8
+
+load_dotenv('backend/.env')
+
+basePath = os.getenv("FOLDERPATH")
 
 def data():
-    basePath = 'C:/Users/Crolw/OneDrive/Documents/GitHub/lip-reading/MIRACL-VC1_all_in_one/'
-
     imgs = []
     labels = []
 
@@ -43,33 +52,44 @@ def data():
             for y in range(1, 11): # Repeat Number
                 path = os.path.join(basePath, f"F{str(i).zfill(2)}/phrases/{str(x).zfill(2)}/{str(y).zfill(2)}") # Full FIle Path
 
-                newImgs, newNotCropped = dt.load_images(path, [], [])
-                
-                frames = []
+                newImgs, lipArray, leftShiftArr, leftLipArr, upShiftArr, upLipArr, newNotCropped = dt.load_images(path, [], [])
+                ''' PORBLEM ; SOLUTION => SPLIT IMAGES INTO THEIR SEPERATE VIDEOS '''
+                #print('newImg Len', len(newImgs))
 
-                skipFrames = max(int(len(newImgs) / SEQUENCE_LENTH), 1)
+                def frameSkip(arr):
+                    frames = []
 
-                for frameCount in range(SEQUENCE_LENTH):
-                    index = frameCount*skipFrames
+                    skipFrames = max(int(len(arr) / SEQUENCE_LENTH), 1)
 
-                    if index > len(newImgs)-1:
-                        break
+                    for frameCount in range(SEQUENCE_LENTH):
+                        index = frameCount*skipFrames
+
+                        if index > len(arr)-1:
+                            break
 
 
-                    frame = newImgs[index]
+                        frame = arr[index]
 
-                    frames.append(frame)
+                        frames.append(frame)
 
-                if len(frames) == SEQUENCE_LENTH:
-                    if (x == 9):
-                        valData.append(frames)
-                        valLabel.append(phrases[x-1])
-                    elif (x == 10):
-                        testData.append(frames)
-                        testLabel.append(phrases[x-1])
-                    else:
-                        imgs.append(frames)
-                        labels.append(phrases[x-1])
+                    if len(frames) == SEQUENCE_LENTH:
+                        if (y > 7 and y < 10):
+                            valData.append(frames)
+                            valLabel.append(phrases[x-1])
+                        elif (y == 10):
+                            testData.append(frames)
+                            testLabel.append(phrases[x-1])
+                        else:
+                            imgs.append(frames)
+                            labels.append(phrases[x-1])
+
+                frameSkip(newImgs)
+                frameSkip(lipArray)
+                frameSkip(leftShiftArr)
+                frameSkip(upShiftArr)
+                frameSkip(leftLipArr)
+                frameSkip(upLipArr)
+                    
                 
                 for k in range(len(newNotCropped)):
                     notCropped.append(newNotCropped[k])
@@ -77,8 +97,6 @@ def data():
     return imgs, labels, notCropped, testData, testLabel, valData, valLabel
 
 def getData():
-    basePath = 'C:/Users/Crolw/OneDrive/Documents/GitHub/lip-reading/MIRACL-VC1_all_in_one/'
-
     imgs = []
     labels = []
 
@@ -90,7 +108,7 @@ def getData():
     valData = []
     valLabel = []
 
-    for i in range(1, 11):
+    for i in range(1, 5):
         if (i == 3):
             continue
         for x in range(1, 11):
@@ -101,11 +119,11 @@ def getData():
 
 
 
-                if (x > 6 and x < 9):
+                if (y == 8 or y == 9):
                     for j in range(len(newImgs)):
                         valData.append(newImgs[j])
                         valLabel.append(phrases[x-1])
-                elif (x > 8 and x < 11):
+                elif (y == 10):
                     for j in range(len(newImgs)):
                         testData.append(newImgs[j])
                         testLabel.append(phrases[x-1])
@@ -166,9 +184,6 @@ trainImages, trainLabels, notCropped, testImages, testLabels, validationImages, 
 
 trainImages = convertToNumpy(trainImages)
 
-cv.imshow('img', trainImages[12][4])
-cv.waitKey(0)
-
 trainLabels = convertToNumpy(trainLabels)
 
 testImages = convertToNumpy(testImages)
@@ -179,30 +194,21 @@ validationImages = convertToNumpy(validationImages)
 
 validationLabels = convertToNumpy(validationLabels)
 
-print(trainImages.shape)
+model = neuralNetwork(trainImages.shape[1], trainImages.shape[2], trainImages.shape[3], trainImages.shape[4])
 
-model = neuralNetwork(trainImages.shape[1], trainImages.shape[2], trainImages.shape[3])
-
-optimizer = Adam(lr=0.001)
+optimizer = Adam(learning_rate=0.0001, beta_1=0.9, beta_2=0.999)
 model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
 
 onehotTrain = oneHotEncode(phrases, trainLabels)
 onehotTest = oneHotEncode(phrases, testLabels)
 onehotValidation = oneHotEncode(phrases, validationLabels)
 
-'''
-trainImages = trainImages.reshape(trainImages.shape[0], 13, trainImages.shape[1], trainImages.shape[1], 1)
-validationImages = validationImages.reshape(validationImages.shape[0], 13, validationImages.shape[1], validationImages.shape[1], 1)
-testImages = testImages.reshape(testImages.shape[0], 13, testImages.shape[1], testImages.shape[1], 1)
-'''
+earlyStoppiingCallback = EarlyStopping(monitor='val_loss', patience=20, mode='min', restore_best_weights=True)
 
-earlyStoppiingCallback = EarlyStopping(monitor='val_loss', patience=10, mode='min', restore_best_weights=True)
-
-
-history = model.fit(trainImages, onehotTrain, epochs=50, batch_size=8,
+history = model.fit(trainImages, onehotTrain, epochs=50, batch_size=16,
                     callbacks=[earlyStoppiingCallback],
                     validation_data=(validationImages, onehotValidation),
-                    validation_batch_size=8, shuffle='batch_size')
+                    validation_batch_size=16, shuffle=True)
 
 print(f'Loss: {history.history["loss"]}')
 print(f'Val_Loss: {history.history["val_loss"]}')
@@ -234,12 +240,3 @@ print('Test Loss: ', score[0])
 print('Test Accuracy: ', score[1])
 
 #model.save('./model.keras')
-
-'''
-pred = model.predict(testImgs.reshape(testImgs.shape[0], 1, testImgs.shape[1], testImgs.shape[1], 1), bacth_size=13)
-pred = np.argmax(pred, axis=1)[:5]
-label = np.argmax(onehotTest, axis=1)[:5]
-
-print('Prediction: ', pred)
-print('Actual Label: ', label)
-'''

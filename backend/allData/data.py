@@ -14,7 +14,21 @@ load_dotenv('backend/.env')
 
 basePath = os.getenv("FOLDERPATH")
 
+def lipCrop(img, width, height, x=0, y=0):
+    left = int(width/2)
+    right = int(height/2)
+    lipCrop = img[right:height + y, int(left/2):int((left+(left/2))) + x]
+    lipCrop = cv.resize(lipCrop, (91, 91))
+
+    return lipCrop
+
 def load_images(folder, array, notCropped):
+    lipArray = []
+    upLipArr = []
+    leftLipArr = []
+    leftShiftArr = []
+    upShiftArr = []
+
     for filename in os.listdir(folder):
 
         if ("depth" in filename):
@@ -22,30 +36,39 @@ def load_images(folder, array, notCropped):
 
         img = mpimg.imread(os.path.join(folder, filename))
 
-        greyImg = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+        cropImg = cropSingle(img, (90, 90))
 
-        cropImg = cropSingle(greyImg, (90, 90))
         if cropImg is not None:
-            (width, height) = np.array(cropImg).shape
-            left = int(width/2)
-            right = int(height/2)
-            left2 = int(left/2)
-            left3 = int((left+(left/2)))
-            cropImg = cropImg[right:height, left2:left3]
-            cropImg = cv.resize(cropImg, (91, 91))
+            
+            (width, height, channels) = np.array(cropImg).shape
 
+            TLeft = np.float32([[1, 0, 0], [0, 1, -10]])
+            TUp = np.float32([[1, 0, 10], [0, 1, 0]])
+
+            leftShift = cv.warpAffine(cropImg, TLeft, (width, height))
+            upShift = cv.warpAffine(cropImg, TUp, (width, height))
+
+            lipImgCropped = lipCrop(cropImg, width, height)
+            leftLipImgCropped = lipCrop(leftShift, width, height, -10, 0)
+            upLipImgCropped = lipCrop(upShift, width, height, 0, 10)
+
+            leftShiftArr.append(leftShift)
+            leftLipArr.append(leftLipImgCropped)
+            upShiftArr.append(upShift)
+            upLipArr.append(upLipImgCropped)
+            lipArray.append(lipImgCropped)
             array.append(cropImg)
         else:
-            cropImg = cropSingle(greyImg, (100, 100))
+            cropImg = cropSingle(img, (100, 100))
             
             
             if (len(notCropped) > 0):
             
-                notCropped.append({'img': img, 'greyImg': greyImg, 'cropImg': cropImg, 'index': (notCropped[-1]['index'] + 1)})
+                notCropped.append({'img': img, 'greyImg': img, 'cropImg': cropImg, 'index': (notCropped[-1]['index'] + 1)})
             else:
-                notCropped.append({'img': img, 'greyImg': greyImg, 'cropImg': cropImg, 'index': len(array)})
+                notCropped.append({'img': img, 'greyImg': img, 'cropImg': cropImg, 'index': len(array)})
 
-    return array, notCropped
+    return array, lipArray, leftShiftArr, leftLipArr, upShiftArr, upLipArr, notCropped
 
 
 

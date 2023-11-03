@@ -10,25 +10,32 @@ from keras.regularizers import L2
 
 def neuralNetwork(seqLen, imgHeight, imgWidth):
 
+
     model = models.Sequential([
-        ConvLSTM2D(filters=4, kernel_size=(3, 3), activation='relu', recurrent_dropout=0.3, return_sequences=True, 
-                   input_shape=(seqLen, imgHeight, imgWidth, 1)),
-        MaxPool3D(pool_size=(1, 2, 2), padding='same'),
-        TimeDistributed(Dropout(0.3)),
+        ConvLSTM2D(filters=4, kernel_size=(3, 3), strides=(2, 2), activation='relu', recurrent_dropout=0.7, return_sequences=True, 
+                   input_shape=(seqLen, imgHeight, imgWidth, 3), data_format='channels_last'),
+        
+        BatchNormalization(),
+        TimeDistributed(MaxPool2D(pool_size=(2, 2), padding='same')),
+        Dropout(0.7),
+        
+        ConvLSTM2D(filters=8, kernel_size=(3, 3), strides=(2, 2), activation='relu', recurrent_dropout=0.7, return_sequences=True, 
+                    data_format='channels_last'),
+        BatchNormalization(),
+        TimeDistributed(MaxPool2D(pool_size=(2, 2), padding='same')),
+        Dropout(0.7),
 
-        ConvLSTM2D(filters=8, kernel_size=(3, 3), activation='relu', recurrent_dropout=0.3, return_sequences=True, 
-                   input_shape=(seqLen, imgHeight, imgWidth, 1)),
-        MaxPool3D(pool_size=(1, 2, 2), padding='same'),
-        TimeDistributed(Dropout(0.3)),
+        ConvLSTM2D(filters=16, kernel_size=(3, 3), strides=(2, 2), activation='relu', recurrent_dropout=0.7, return_sequences=True, 
+                    data_format='channels_last'),
+        BatchNormalization(),
+        TimeDistributed(MaxPool2D(pool_size=(2, 2), padding='same')),
+        Dropout(0.7),
 
-        ConvLSTM2D(filters=16, kernel_size=(3, 3), activation='relu', recurrent_dropout=0.3, return_sequences=True, 
-                   input_shape=(seqLen, imgHeight, imgWidth, 1)),
-        MaxPool3D(pool_size=(1, 2, 2), padding='same'),
-        TimeDistributed(Dropout(0.3)),
 
         Flatten(),
         Dense(10, activation='softmax')
     ])
+
     '''
     model = models.Sequential([
         Input((None, 91, 91, 1)),
@@ -68,7 +75,8 @@ def neuralNetwork(seqLen, imgHeight, imgWidth):
         #10 dense neurons in each layer and is connected to previous layers. 
 
     ])
- 
+    '''
+    '''
     model = models.Sequential([
 
         Conv2D(filters=32, kernel_size=(3, 3), padding='same', activation='relu', input_shape=(76, 76, 1)),
@@ -94,17 +102,7 @@ def neuralNetwork(seqLen, imgHeight, imgWidth):
         Dense(6, activation='softmax')
     ])
     '''
-    # Using Convolutional NN Base
 
-    # Sample (WIP Using Keras)
-    # layers.Conv2d
-    # layers.relu => some activation function (relu is most used)
-    # .layers.maxpool
-    # *REPEAT*
-    # FULLY CONNECTED LAYER
-    # layers.flatten => FLATTEN
-    # layers.softmax
-    # outputs => DENSE
     model.summary()
     return model
 
