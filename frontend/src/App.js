@@ -39,8 +39,9 @@ function App() {
   
   return (
     <div className="App">
-    <h1 className="text-3xl font-bold font-serif">Lip Interpretation Process</h1>
+    <h1 className="text-3xl font-bold font-serif mb-20 mt-10">Lip Interpretation Process</h1>
       
+
       <Images/>
       <div className='image'>
         <img src={image}/>
